@@ -36,7 +36,9 @@ const ZONES = [
   { id:'maintenance',label:'Maintenance Records',  ico:'📋' },
   { id:'weather',    label:'Weather Archive',      ico:'🌦️' },
   { id:'atc',        label:'ATC Transcript',       ico:'📡' },
-  { id:'forensics',  label:'Lab & Forensics',      ico:'🧪' }
+  { id:'forensics',  label:'Lab & Forensics',      ico:'🧪' },
+  { id:'witness',    label:'Witness Statements',   ico:'🗣️' },
+  { id:'cargo',      label:'Cargo & Load Sheet',   ico:'📦' }
 ];
 
 // ---------- Flavor text pools ----------
@@ -132,6 +134,32 @@ const CAUSE_TREE = [
           blurb:'a latent manufacturing defect in a structural fitting, present since production, ultimately failed under normal loads'
         }
       ]},
+      { id:'landing_gear', label:'Landing Gear', leaves:[
+        { id:'gear_collapse', label:'Landing gear collapse on touchdown', zone:'structure',
+          positive:[
+            {label:'Wreckage Analysis', detail:'The main gear strut shows a fatigue fracture at a known weak point, consistent with failure under a normal (not excessive) landing load.'},
+            {label:'Maintenance Records', detail:'The gear had exceeded its overhaul interval, and a prior inspection noted early-stage cracking that was deferred rather than repaired.'}
+          ],
+          negative:{label:'Wreckage Analysis', detail:'Landing gear struts and attachment points show no fatigue cracking and are within normal service limits.'},
+          blurb:'a fatigued landing gear strut, with cracking that had been deferred rather than repaired, collapsed under a normal landing load'
+        },
+        { id:'brake_failure', label:'Brake system failure', zone:'structure',
+          positive:[
+            {label:'Wreckage Analysis', detail:'Brake assemblies show severe overheating and a hydraulic seal failure, consistent with a loss of braking on rollout.'},
+            {label:'Cockpit Voice Recorder', detail:'Crew reported the brakes were "not doing anything" during landing rollout despite normal pedal pressure.'}
+          ],
+          negative:{label:'Wreckage Analysis', detail:'Brake assemblies and hydraulic seals are intact and show normal wear consistent with proper function.'},
+          blurb:'a hydraulic seal failure in the brake system caused a loss of braking effectiveness during landing rollout'
+        },
+        { id:'gear_failed_to_extend', label:'Landing gear failed to extend', zone:'structure',
+          positive:[
+            {label:'Wreckage Analysis', detail:'The gear extension mechanism shows a jammed actuator, preventing the gear from locking down despite the crew\u2019s attempts to cycle it.'},
+            {label:'Cockpit Voice Recorder', detail:'Crew ran the abnormal gear extension checklist multiple times without success before committing to a gear-up landing.'}
+          ],
+          negative:{label:'Wreckage Analysis', detail:'Gear extension mechanism and actuators show normal function with no jamming or mechanical obstruction.'},
+          blurb:'a jammed gear actuator prevented the landing gear from extending and locking despite correct crew procedure'
+        }
+      ]},
       { id:'systems', label:'Systems Failure', leaves:[
         { id:'sensor_malfunction', label:'Faulty angle-of-attack / airspeed sensor', zone:'engine',
           positive:[
@@ -206,6 +234,24 @@ const CAUSE_TREE = [
           blurb:'the crew, under full control of the aircraft, lost awareness of terrain proximity and continued a descent into rising ground'
         }
       ]},
+      { id:'fatigue', label:'Fatigue & Physiology', leaves:[
+        { id:'pilot_fatigue', label:'Pilot fatigue / impaired alertness', zone:'witness',
+          positive:[
+            {label:'Duty Roster', detail:'The crew had been on duty for well beyond the recommended window, following a red-eye rotation with minimal rest.'},
+            {label:'Cockpit Voice Recorder', detail:'Speech patterns and slowed response times in the final minutes of the recording are consistent with significant fatigue.'}
+          ],
+          negative:{label:'Duty Roster', detail:'The crew\u2019s duty and rest times were well within limits, with no indication of fatigue.'},
+          blurb:'the crew was operating on severely degraded rest, and fatigue slowed their recognition of and response to the developing problem'
+        },
+        { id:'medical_incapacitation', label:'Pilot medical incapacitation', zone:'witness',
+          positive:[
+            {label:'Witness Statement', detail:'The remaining crew member reported the other pilot became suddenly unresponsive at the controls partway through the flight.'},
+            {label:'Cockpit Voice Recorder', detail:'One pilot\u2019s speech becomes slurred and then stops entirely, with no response to the other pilot\u2019s prompts.'}
+          ],
+          negative:{label:'Witness Statement', detail:'Both crew members remained alert, responsive, and in normal health throughout the flight.'},
+          blurb:'one pilot suffered a sudden medical incapacitation at the controls, leaving the other to manage the aircraft alone'
+        }
+      ]},
       { id:'crm', label:'Crew Resource Management', leaves:[
         { id:'atc_miscommunication', label:'Miscommunication with air traffic control', zone:'atc',
           positive:[
@@ -270,6 +316,24 @@ const CAUSE_TREE = [
           ],
           negative:{label:'Wreckage Analysis', detail:'No organic residue or impact damage consistent with a bird strike found anywhere on the airframe.'},
           blurb:'a bird strike to the windscreen or leading edge caused structural and/or visibility damage during a critical phase'
+        }
+      ]},
+      { id:'atmospheric', label:'Atmospheric Hazards', leaves:[
+        { id:'volcanic_ash', label:'Volcanic ash encounter', zone:'engine',
+          positive:[
+            {label:'Engine Teardown', detail:'Glassy deposits found fused to turbine blades, a signature consistent with ingested volcanic ash melting and re-solidifying inside the engine.'},
+            {label:'Weather Archive', detail:'An ash advisory for a nearby eruption was active along a portion of the filed route.'}
+          ],
+          negative:{label:'Engine Teardown', detail:'No glassy deposits or ash-related erosion found on turbine blades or compressor surfaces.'},
+          blurb:'the aircraft transited an unreported volcanic ash cloud, and ingested ash melted inside the engine causing a loss of power'
+        },
+        { id:'high_altitude_stall', label:'High-altitude aerodynamic stall', zone:'cockpit',
+          positive:[
+            {label:'Flight Data Recorder', detail:'Airspeed decayed steadily at high altitude until the aircraft exceeded its critical angle of attack and departed controlled flight.'},
+            {label:'Cockpit Voice Recorder', detail:'A stall warning sounded and continued for an extended period before the crew applied correct recovery inputs.'}
+          ],
+          negative:{label:'Flight Data Recorder', detail:'Airspeed and angle of attack remained comfortably within safe margins at altitude throughout the flight.'},
+          blurb:'the aircraft was flown into a high-altitude aerodynamic stall as its speed margin eroded near the edge of its performance envelope'
         }
       ]},
       { id:'terrain', label:'Terrain & Visibility', leaves:[
@@ -352,6 +416,24 @@ const CAUSE_TREE = [
           ],
           negative:{label:'Lab Analysis', detail:'No evidence of deliberate tampering found; all damage is consistent with normal operational wear or the accident sequence itself.'},
           blurb:'deliberate tampering with a flight-critical system was found, pointing to intentional interference rather than an accident'
+        }
+      ]},
+      { id:'load', label:'Cargo & Weight', leaves:[
+        { id:'weight_balance_error', label:'Weight and balance calculation error', zone:'cargo',
+          positive:[
+            {label:'Load Sheet Audit', detail:'The final load sheet significantly understated actual cargo weight, shifting the center of gravity well outside the certified envelope.'},
+            {label:'Flight Data Recorder', detail:'The aircraft required far more control input than normal to rotate and climb, consistent with an aft center-of-gravity condition.'}
+          ],
+          negative:{label:'Load Sheet Audit', detail:'The load sheet accurately reflects actual cargo weight and distribution, with center of gravity well within the certified envelope.'},
+          blurb:'an error in the load sheet understated cargo weight and pushed the center of gravity outside the safe envelope'
+        },
+        { id:'shifting_cargo', label:'Improperly secured cargo shifted in flight', zone:'cargo',
+          positive:[
+            {label:'Wreckage Analysis', detail:'Cargo restraint straps found failed or unattached, with cargo displaced toward the rear of the hold.'},
+            {label:'Flight Data Recorder', detail:'A sudden, unexplained aft center-of-gravity shift was recorded mid-flight, consistent with cargo movement.'}
+          ],
+          negative:{label:'Wreckage Analysis', detail:'Cargo restraints remained intact and properly secured, with no evidence of in-flight cargo movement.'},
+          blurb:'inadequately secured cargo broke loose and shifted aft in flight, suddenly moving the center of gravity out of safe limits'
         }
       ]}
     ]
