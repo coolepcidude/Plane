@@ -211,6 +211,53 @@ body{
   display:flex; gap:8px; justify-content:center; margin-top:16px; flex-wrap:wrap;
 }
 
+/* Record panel */
+.rank-row{
+  display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+}
+.rank-badge{
+  font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:1.5px;
+  color:var(--amber); font-size:16px;
+}
+.streak-box{ text-align:center; }
+.streak-num{
+  font-family:'Oswald',sans-serif; font-size:26px; font-weight:700; color:var(--amber);
+  line-height:1;
+}
+.streak-label{ font-size:10px; color:var(--dim); letter-spacing:1px; margin-top:2px; }
+.history-list{
+  margin-top:14px; padding-top:10px; border-top:1px solid var(--line);
+  display:flex; flex-direction:column; gap:5px;
+}
+.history-row{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--dim); }
+.hr-title{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%; }
+.hr-acc{ font-family:'Oswald',sans-serif; font-weight:600; }
+.hr-acc.full{ color:var(--green); }
+.hr-acc.partial{ color:var(--amber); }
+.hr-acc.none{ color:var(--red); }
+
+.btn.small{ font-size:11px; padding:7px 14px; margin-top:10px; }
+
+/* Difficulty picker */
+.diff-row{
+  display:flex; align-items:center; gap:8px; justify-content:center;
+  margin-top:16px; flex-wrap:wrap;
+}
+.diff-label{ font-size:11px; color:var(--dim); letter-spacing:1px; }
+.diff-btn{
+  font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:.5px;
+  background:var(--panel2); border:1px solid var(--line); color:var(--text);
+  padding:7px 14px; border-radius:4px; cursor:pointer;
+}
+.diff-btn:hover{ border-color:var(--amber-dim); }
+.diff-btn.active{ background:var(--amber); color:#1a1206; border-color:var(--amber); }
+
+.finding-item.hint{
+  border-left-color:var(--blue);
+  background:#0f1c22;
+}
+.finding-item.hint .flabel{ color:var(--blue); }
+
 .mode-tag{
   display:inline-block; font-size:10px; letter-spacing:1px; padding:2px 8px;
   border-radius:10px; border:1px solid var(--amber-dim); color:var(--amber);
