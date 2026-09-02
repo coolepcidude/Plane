@@ -14,18 +14,27 @@ const ALL_LEAVES = flattenLeaves();
 
 let CASE_COUNTER = 0;
 
-function generateCase(seed){
+const DIFFICULTIES = {
+  easy:     { label:'Easy',     twoCauseChance:0.10, distractorRange:[2,4], budgetPad:2 },
+  standard: { label:'Standard', twoCauseChance:0.28, distractorRange:[4,6], budgetPad:1 },
+  hard:     { label:'Hard',     twoCauseChance:0.45, distractorRange:[6,9], budgetPad:0 }
+};
+
+function generateCase(seed, difficulty){
+  difficulty = difficulty || 'standard';
+  const diff = DIFFICULTIES[difficulty] || DIFFICULTIES.standard;
   const rng = mulberry32(seed);
   CASE_COUNTER++;
 
   // How many true causes this crash has.
-  const numCauses = rng() < 0.28 ? 2 : 1;
+  const numCauses = rng() < diff.twoCauseChance ? 2 : 1;
   const correctLeaves = pickN(rng, ALL_LEAVES, numCauses);
   const correctIds = new Set(correctLeaves.map(l => l.id));
 
   // Pick some distractor leaves whose "negative" (ruled-out) evidence will appear.
   const pool = ALL_LEAVES.filter(l => !correctIds.has(l.id));
-  const numDistractors = 4 + Math.floor(rng()*3); // 4-6
+  const [dMin, dMax] = diff.distractorRange;
+  const numDistractors = dMin + Math.floor(rng()*(dMax-dMin+1));
   const distractors = pickN(rng, pool, numDistractors);
 
   // Build evidence grouped by zone.
@@ -42,7 +51,7 @@ function generateCase(seed){
   });
 
   const nonEmptyZones = ZONES.filter(z => zoneEvidence[z.id].length > 0);
-  const actionBudget = Math.max(4, Math.min(6, nonEmptyZones.length - 1));
+  const actionBudget = Math.max(3, Math.min(8, nonEmptyZones.length - 1 + diff.budgetPad));
 
   // Flavor text
   const aircraft = pick(rng, FLAVOR.aircraftTypes);
@@ -56,14 +65,20 @@ function generateCase(seed){
   const meta = `${aircraft[0].toUpperCase()+aircraft.slice(1)} · Incident occurred ${phase} · ${location[0].toUpperCase()+location.slice(1)}`;
   const brief = `${title} (a ${aircraft} operated by ${airline}) experienced a serious in-flight event ${phase}, departing from ${location}. ${outcome} Investigators have recovered the flight data recorder, cockpit voice recorder, and wreckage for analysis. Your task: examine the evidence and determine the probable cause.`;
 
+  // A witness/category-level hint, purchasable in-game for an extra action.
+  const hintCategory = correctLeaves[0].catLabel;
+  const hintText = `Investigators strongly suspect this falls under "${hintCategory}."`;
+
   return {
     uid: `case-${seed}-${CASE_COUNTER}`,
     seed,
+    difficulty,
     title, meta, brief,
     zoneEvidence,
     actionBudget,
     correctLeafIds: [...correctIds],
-    correctLeaves
+    correctLeaves,
+    hintText
   };
 }
 
