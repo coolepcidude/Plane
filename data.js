@@ -29,24 +29,100 @@ function pickN(rng, arr, n){
 }
 
 // ---------- Investigation zones ----------
+// type: 'hidden_object' = search a wreckage panel with a fog-of-war cursor light
+//       'log_review'    = skim a stack of records, flag the anomalies among filler entries
+//       'interview'     = ask a witness up to 3 questions, picking from 3 options each
 const ZONES = [
-  { id:'cockpit',    label:'Cockpit Recorders',   ico:'🎙️' },
-  { id:'engine',     label:'Engine & Powerplant',  ico:'🔥' },
-  { id:'structure',  label:'Airframe & Structure', ico:'🛠️' },
-  { id:'maintenance',label:'Maintenance Records',  ico:'📋' },
-  { id:'weather',    label:'Weather Archive',      ico:'🌦️' },
-  { id:'atc',        label:'ATC Transcript',       ico:'📡' },
-  { id:'forensics',  label:'Lab & Forensics',      ico:'🧪' },
-  { id:'witness',    label:'Witness Statements',   ico:'🗣️' },
-  { id:'cargo',      label:'Cargo & Load Sheet',   ico:'📦' }
+  { id:'cockpit',    label:'Cockpit Recorders',   ico:'🎙️', type:'hidden_object' },
+  { id:'engine',     label:'Engine & Powerplant',  ico:'🔥', type:'hidden_object' },
+  { id:'structure',  label:'Airframe & Structure', ico:'🛠️', type:'hidden_object' },
+  { id:'cargo',      label:'Cargo & Load Sheet',   ico:'📦', type:'hidden_object' },
+  { id:'maintenance',label:'Maintenance Records',  ico:'📋', type:'log_review' },
+  { id:'weather',    label:'Weather Archive',      ico:'🌦️', type:'log_review' },
+  { id:'atc',        label:'ATC Transcript',       ico:'📡', type:'log_review' },
+  { id:'forensics',  label:'Lab & Forensics',      ico:'🧪', type:'log_review' },
+  { id:'witness',    label:'Witness Statements',   ico:'🗣️', type:'interview' }
 ];
+
+// ---------- Filler log entries (normal, non-clue records shown alongside the real evidence) ----------
+const LOG_FILLERS = {
+  maintenance: [
+    { label:'Routine Check — Cabin Lighting', detail:'No discrepancies noted. System operating within normal parameters.' },
+    { label:'Scheduled Service — Lavatory System', detail:'Serviced on schedule. No defects found.' },
+    { label:'Tire Pressure Check', detail:'All tire pressures within specified range at time of inspection.' },
+    { label:'Avionics Software Update', detail:'Update applied successfully; post-install checks all passed.' },
+    { label:'Galley Equipment Inspection', detail:'Minor wear noted on a coffee maker latch; logged for future replacement, not flight-critical.' },
+    { label:'Fire Extinguisher Check', detail:'Charge and seal verified intact on all cabin and cargo extinguishers.' },
+    { label:'Tire Change — Nose Gear', detail:'Routine tire replacement performed per schedule. No anomalies during removal.' },
+    { label:'Interior Placard Audit', detail:'All required placards present and legible.' },
+    { label:'Oxygen System Check', detail:'Passenger oxygen generators tested within normal parameters.' },
+    { label:'Software Log Review', detail:'No fault codes recorded in the flight management computer over the prior 30 days.' }
+  ],
+  weather: [
+    { label:'Regional Forecast', detail:'Conditions forecast as generally favorable for the route and time of departure.' },
+    { label:'Surface Observation', detail:'Winds light and variable, visibility unrestricted at the departure aerodrome.' },
+    { label:'Upper Air Analysis', detail:'No significant jet stream disturbance noted along the planned cruise altitude.' },
+    { label:'Satellite Loop', detail:'Scattered cloud cover with no organized convective development visible.' },
+    { label:'Temperature Trend', detail:'Temperatures tracked close to seasonal averages throughout the period.' },
+    { label:'Pressure Chart', detail:'A weak high-pressure ridge dominated the region with no notable fronts nearby.' },
+    { label:'Humidity Readings', detail:'Relative humidity within a typical range for the season, nothing atypical logged.' },
+    { label:'Radar Summary', detail:'No significant echoes recorded along the filed route during the window in question.' }
+  ],
+  atc: [
+    { label:'Departure Clearance', detail:'Standard departure clearance issued and read back correctly.' },
+    { label:'Handoff Log', detail:'Aircraft handed off between sectors with no irregularities noted.' },
+    { label:'Frequency Change', detail:'Routine frequency change acknowledged promptly by the crew.' },
+    { label:'Altitude Confirmation', detail:'Assigned altitude confirmed and maintained throughout the sector.' },
+    { label:'Traffic Advisory', detail:'A routine traffic advisory was issued and acknowledged; no conflict developed.' },
+    { label:'Sequencing Call', detail:'Aircraft was sequenced normally into the arrival flow with standard spacing.' },
+    { label:'Squawk Assignment', detail:'Transponder code assigned and verified without incident.' },
+    { label:'Runway Change Notice', detail:'A routine runway change was issued well in advance and accepted without difficulty.' }
+  ],
+  forensics: [
+    { label:'Toxicology Screen', detail:'Standard toxicology screen returned unremarkable results.' },
+    { label:'Material Sample — Panel A', detail:'Sample matches certified specification; no anomalies detected.' },
+    { label:'Fluid Analysis — Hydraulic', detail:'Hydraulic fluid sample within specification, no contamination found.' },
+    { label:'Fluid Analysis — Fuel (routine)', detail:'Routine fuel sample from an unrelated tank tested clean and within spec.' },
+    { label:'Fingerprint / Access Sweep', detail:'Access sweep of an unrelated panel shows only authorized maintenance personnel.' },
+    { label:'Metallurgical Sample — Bracket', detail:'Bracket sample shows normal grain structure, no fatigue or defect indicators.' },
+    { label:'Paint & Coating Analysis', detail:'Coating thickness and adhesion within normal manufacturing tolerances.' },
+    { label:'Residue Swab — Cabin', detail:'Cabin residue swab returned no unusual chemical signatures.' }
+  ]
+};
+
+// ---------- Witness interview content ----------
+const WITNESS_QUESTIONS = [
+  { q:'What exactly did you see or hear?', options:['Describe what I saw','Describe what I heard','I would rather not say'] },
+  { q:'Did anything seem unusual in the time leading up to it?', options:['Now that you mention it...','Nothing comes to mind','I was not really paying attention'] },
+  { q:'Where were you at the time, and what happened right after?', options:['I was close by','I was some distance away','I only heard about it afterward'] }
+];
+const WITNESS_FILLERS = [
+  'Honestly, it all happened pretty fast. I did not see anything specific.',
+  'I was focused on my own work at the time — I really can not add much.',
+  'It seemed like a completely normal day to me, right up until it wasn\u2019t.',
+  'I heard some noise but couldn\u2019t tell you exactly what caused it.',
+  'I wish I could be more helpful, but nothing stands out in my memory.',
+  'Everyone around me seemed just as surprised as I was.',
+  'I only found out what happened after the fact, secondhand.',
+  'I was some distance away, so my view of it was pretty limited.'
+];
+
+// ---------- Aircraft naming (fictional manufacturers & models — no real aircraft used) ----------
+const AIRCRAFT = {
+  manufacturers: ['Aerotek','Norstar','Kestrel Aerospace','Vantage Aviation','Falconair Industries','Meridian Aircraft Co.','Highpoint Aerospace','Coastline Aviation Works','Summit Aerodyne','Ravencraft'],
+  familyLetters: ['AT','NX','KA','VX','FR','MA','HP','CA','SM','RC'],
+};
+function generateAircraftName(rng){
+  const mfr = pick(rng, AIRCRAFT.manufacturers);
+  const fam = pick(rng, AIRCRAFT.familyLetters);
+  const num = 100 + Math.floor(rng()*800);
+  const variantRoll = rng();
+  const variant = variantRoll < 0.33 ? '' : (variantRoll < 0.66 ? '-ER' : 'X');
+  return { manufacturer: mfr, model: `${fam}-${num}${variant}` };
+}
 
 // ---------- Flavor text pools ----------
 const FLAVOR = {
-  aircraftTypes: [
-    'regional jet','narrow-body airliner','wide-body airliner','twin-engine turboprop',
-    'cargo freighter','business jet','commuter turboprop'
-  ],
   airlines: [
     'Meridian Air','Northline Airways','Falcon Regional','Continental Skyways',
     'Harborview Cargo','Vantage Air','Coastal Express Air','Summit Airlines'
