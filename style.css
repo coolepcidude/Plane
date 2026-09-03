@@ -258,6 +258,97 @@ body{
 }
 .finding-item.hint .flabel{ color:var(--blue); }
 
+/* Zone grid tweaks */
+.zone-card.active-zone{ border-color:var(--blue); }
+
+/* Workspace panel (holds the active minigame) */
+.workspace-panel{
+  margin-top:14px;
+  background:var(--panel3);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:14px;
+}
+.workspace-title{
+  font-family:'Oswald',sans-serif; font-size:13.5px; letter-spacing:.5px;
+  color:var(--amber); margin-bottom:4px;
+}
+.workspace-hint{ font-size:11.5px; color:var(--dim); margin-bottom:10px; line-height:1.5; }
+
+/* Hidden object search */
+.hidden-object-stage{
+  position:relative;
+  width:100%;
+  height:260px;
+  border-radius:6px;
+  overflow:hidden;
+  background:
+    repeating-linear-gradient(135deg, #1a2024 0px, #1a2024 2px, #171c1f 2px, #171c1f 4px);
+  border:1px solid var(--line);
+  cursor:crosshair;
+  touch-action:none;
+}
+.debris-field{ position:absolute; inset:0; }
+.debris-shape{
+  position:absolute;
+  background:linear-gradient(135deg, #3a4348, #23282b);
+  border:1px solid #4a545a;
+  border-radius:3px;
+  opacity:.85;
+}
+.found-marker{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  font-size:26px;
+  filter:drop-shadow(0 0 8px rgba(255,179,44,.8));
+  animation: pop-in .25s ease-out;
+}
+@keyframes pop-in{ from{ transform:translate(-50%,-50%) scale(0.3); opacity:0; } to{ transform:translate(-50%,-50%) scale(1); opacity:1; } }
+.fog-layer{
+  position:absolute; inset:0;
+  --mx:50%; --my:50%; --radius:75px;
+  background: radial-gradient(circle var(--radius) at var(--mx) var(--my),
+    rgba(6,8,9,0) 0%, rgba(6,8,9,0) 55%, rgba(6,8,9,0.985) 82%);
+  pointer-events:none;
+}
+
+/* Log review */
+.log-stack{
+  display:flex; flex-direction:column; gap:6px;
+  max-height:340px; overflow-y:auto; padding-right:2px;
+}
+.log-entry{
+  background:var(--panel2); border:1px solid var(--line); border-left:3px solid var(--line);
+  border-radius:0 4px 4px 0; padding:8px 10px; cursor:pointer; font-size:12px;
+}
+.log-entry:hover{ border-color:var(--amber-dim); border-left-color:var(--amber-dim); }
+.log-entry-head{ color:#dfe6ea; }
+.log-entry.flagged{ cursor:default; }
+.log-entry.flagged.key{ border-left-color:var(--amber); background:#1a1510; }
+.log-entry.flagged.normal{ border-left-color:var(--dim); opacity:.7; }
+.log-entry-detail{ margin-top:6px; font-size:11.5px; color:var(--amber); line-height:1.5; }
+.log-entry.flagged.normal .log-entry-detail{ color:var(--dim); }
+
+/* Interview */
+.interview-stack{ display:flex; flex-direction:column; gap:12px; }
+.interview-block{
+  background:var(--panel2); border:1px solid var(--line); border-radius:5px; padding:11px;
+}
+.interview-q{ font-size:12.5px; color:#e8edf0; margin-bottom:8px; font-family:'Oswald',sans-serif; }
+.interview-opts{ display:flex; flex-direction:column; gap:6px; }
+.interview-opt{
+  font-family:'Share Tech Mono',monospace; font-size:12px; text-align:left;
+  background:var(--panel3); border:1px solid var(--line); color:var(--text);
+  padding:8px 10px; border-radius:4px; cursor:pointer;
+}
+.interview-opt:hover:not(:disabled){ border-color:var(--amber-dim); }
+.interview-opt:disabled{ opacity:.4; cursor:default; }
+.interview-response{
+  margin-top:9px; font-size:12px; font-style:italic; color:var(--dim);
+  padding:8px 10px; background:var(--panel3); border-radius:4px; border-left:3px solid var(--line);
+}
+.interview-response.key{ color:var(--amber); border-left-color:var(--amber); background:#1a1510; font-style:normal; }
+
 .mode-tag{
   display:inline-block; font-size:10px; letter-spacing:1px; padding:2px 8px;
   border-radius:10px; border:1px solid var(--amber-dim); color:var(--amber);
